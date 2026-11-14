@@ -124,6 +124,12 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 - **Cause:** the project has two workspaces: the local folder and the GitHub repo. Paperclip clones the repo workspace into the local one, and hides it with `.git/info/exclude`.
 - **Fix:** give each project one workspace, the local folder. Remove the repo workspace (`DELETE /api/projects/{pid}/workspaces/{wid}`), delete the folder, and remove its line from `.git/info/exclude`.
 
+#### 21. Follow-ups are found but never done
+- **Symptom:** issues agents filed as follow-ups sit in the Paperclip backlog for weeks. The bugs they describe are still there.
+- **Causes:** backlog issues never wake anyone. Each one waited on a step nobody owned, such as "don't start until Lead moves it", and many were filed as children of tickets that then finished, so they dropped out of sight. The owner plans from a different tracker and never looks at Paperclip's backlog.
+- **Fix:** follow-ups go to the tracker the owner plans from (Lead needs that tracker's connector with create access). Paperclip holds only work in progress. See `paperclip-team-workflow`.
+- **Check:** the Paperclip backlog is empty, or only holds issues the owner has chosen to park there.
+
 ### Harmless
 
 - *"Cancelled before issue reassignment"* and *"Cancelled because issue assignee changed"* runs are normal churn when issues are reassigned. Ignore them.
@@ -162,6 +168,7 @@ For each agent:
 
 - [ ] **One workspace per project**, the local folder (20). *Check:* the project's `workspaces` has one entry.
 - [ ] **Weekly worktree cleanup routine** assigned to Lead (19). *Check:* the routine is `active` with a schedule trigger.
+- [ ] **Lead can create issues in the owner's tracker** (21). *Check:* the agent's Tools page lists the create tool, such as `createJiraIssue`.
 
 ### The project repo
 

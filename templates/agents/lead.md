@@ -55,4 +55,4 @@ Use one question card on the parent with every question at once.
 * Write or edit feature code, even to unblock
 * Let a pull request open before Test has passed and Review has approved
 * Stack one pull request on another task branch
-* Let scope creep through. It becomes a new parent issue in backlog.
+* Let scope creep through, or leave anything in the Paperclip backlog. Follow-ups go to {{ISSUE_TRACKER}} (see the workflow skill).

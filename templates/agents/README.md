@@ -7,6 +7,7 @@ Paste each template into the matching agent's **Instructions** page in Paperclip
 | `{{PROJECT}}` | `Acme Notes` |
 | `{{ONE_LINE_DESCRIPTION}}` | `a note-taking app for small teams` |
 | `{{OWNER}}` | `Alex` |
+| `{{ISSUE_TRACKER}}` | `Jira (project ACME)` |
 | `{{BASE_BRANCH}}` | `dev` |
 | `{{TYPECHECK_COMMAND}}` | `` `npm run type-check` `` |
 | `{{UNIT_TEST_COMMAND}}` | `` `npm run test:unit` `` |

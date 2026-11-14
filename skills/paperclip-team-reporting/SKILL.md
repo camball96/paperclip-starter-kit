@@ -22,6 +22,7 @@ Post only when one of these is true:
 - The owner needs to decide something. Use a question card, not a paragraph.
 - A pull request is open and ready to merge.
 - Work is stuck on something only the owner can fix.
+- A follow-up was filed: one line, `Follow-up: ABC-123 · <title>`.
 - The ticket is finished.
 
 Use exactly this shape:

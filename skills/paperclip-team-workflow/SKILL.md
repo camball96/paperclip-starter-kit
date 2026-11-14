@@ -60,7 +60,14 @@ When Test passed and Review approved **on the same commit**, assign Build to Dev
 
 ## Follow-ups
 
-Anything out of scope becomes a new parent issue in backlog, never a child of the current ticket.
+Follow-ups go in the issue tracker the owner plans from (Jira, Linear, GitHub Issues), not in Paperclip. Anything out of scope that an agent finds, such as a bug, a gap or a stale doc, becomes a ticket there. Lead creates it.
+
+- **Title:** what is wrong, in plain words.
+- **Description:** where it is (`file:line`), how it was found, and what done looks like. Link the ticket it came from.
+- Then post one line on the parent: `Follow-up: ABC-123 · <title>`.
+- Never start work on it. The owner decides when it runs, and it comes back as a new ticket.
+
+Paperclip holds only work in progress. Nothing waits in its backlog. If the owner doesn't use a separate tracker, file the follow-up as a top-level Paperclip issue and list it on the parent, so it isn't buried under a finished ticket.
 
 ## Closing
 
