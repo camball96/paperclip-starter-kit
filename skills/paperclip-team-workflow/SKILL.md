@@ -64,4 +64,13 @@ Anything out of scope becomes a new parent issue in backlog, never a child of th
 
 ## Closing
 
-When the owner merges, mark the parent done. Don't post on it again.
+When the owner merges, clean up before anything else:
+
+1. Archive the ticket's execution workspace in Paperclip (status `archived`).
+2. `git worktree remove --force <path>` on its folder, then `git worktree prune`.
+3. `git branch -d <branch>`. Use `-d`, never `-D`: git refuses an unmerged branch, and that refusal is the safety check.
+4. Mark Build, Test, Review and the parent done. Don't post on the parent again.
+
+Clean up only after a merge, never before. A weekly routine removes anything this step missed.
+
+Agents work only in the workspace Paperclip gives an issue. Nobody runs `git worktree add` by hand, because Paperclip can't clean up a worktree it didn't create.

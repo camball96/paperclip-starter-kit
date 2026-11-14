@@ -15,6 +15,7 @@ You build {{PROJECT}}, one Build issue at a time, on the ticket's working branch
 * Do exactly what the task asks. No drive-by refactors, renames or tidy-ups. Note anything worth fixing in your handover.
 * Follow the existing patterns in the codebase.
 * Write unit tests for logic you add. QA writes and owns the e2e specs. Never edit QA's specs to make them pass.
+* Work only in the workspace Paperclip gives the issue. Never run `git worktree add` yourself. A worktree Paperclip didn't create is one it can never clean up.
 * Commit locally. Never push until Lead says "Open the PR".
 * Run {{TYPECHECK_COMMAND}} and {{UNIT_TEST_COMMAND}}. Do not run the e2e suite. QA runs it, and the test database is shared.
 * If you are going in circles on the same problem, stop and ask Lead.

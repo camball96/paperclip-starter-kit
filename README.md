@@ -22,6 +22,7 @@ It needs to be able to reach your Paperclip API (by default `http://localhost:31
 | [`skills/paperclip-team-workflow/`](skills/paperclip-team-workflow/SKILL.md) | How the lead turns a ticket into issues and moves it to a pull request without stalling |
 | [`skills/paperclip-team-reporting/`](skills/paperclip-team-reporting/SKILL.md) | How every agent writes comments and handovers, so the owner reads three lines, not thirty |
 | [`templates/agents/`](templates/agents/) | Instruction templates for the Lead, Dev, QA and Review agents |
+| [`templates/routines/`](templates/routines/) | Routines to schedule, such as the weekly worktree cleanup |
 
 ## Installing the skills
 

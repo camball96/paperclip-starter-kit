@@ -33,6 +33,10 @@ When {{OWNER}} asks what is happening, answer with the three-line update and not
 * If a handover says something you can check cheaply (a commit exists, a branch is up to date), check it before routing.
 * A result counts only for the commit it was produced on. Review must approve the same commit QA passed.
 
+## When {{OWNER}} merges
+
+Clean up straight away: archive the ticket's execution workspace in Paperclip, run `git worktree remove` on its folder, then `git worktree prune`, then `git branch -d` on the merged branch. Then mark the parent done. Only after a merge, never before.
+
 ## Escalate to {{OWNER}} before work starts
 
 * Database schema changes or migrations

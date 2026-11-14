@@ -113,6 +113,17 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 - **Cause:** test and review issues started in a fresh workspace.
 - **Fix:** pin Test and Review to Build's execution workspace, so all three share one worktree and branch.
 
+#### 19. Old worktrees pile up
+- **Symptom:** `git worktree list` shows folders for branches merged days ago. The owner can't check out a branch because *"it is already used by worktree at …"*.
+- **Cause:** Paperclip never closes its execution workspaces on its own, and agents sometimes create worktrees by hand with `git worktree add`, which Paperclip doesn't know about.
+- **Fix:** when the owner merges, Lead archives the ticket's execution workspace (status `archived`), runs `git worktree remove` and `git worktree prune`, and deletes the merged branch with `git branch -d`. Agents never run `git worktree add` themselves. A weekly routine catches anything missed: see [`templates/routines/worktree-cleanup.md`](templates/routines/worktree-cleanup.md).
+- **Check:** `git worktree list` shows only the main checkout and worktrees for open tickets.
+
+#### 20. A full copy of the repo appears inside the repo
+- **Symptom:** a `.paperclip-repositories/` folder holding a stale clone of the same repo. It doesn't show in `git status`.
+- **Cause:** the project has two workspaces: the local folder and the GitHub repo. Paperclip clones the repo workspace into the local one, and hides it with `.git/info/exclude`.
+- **Fix:** give each project one workspace, the local folder. Remove the repo workspace (`DELETE /api/projects/{pid}/workspaces/{wid}`), delete the folder, and remove its line from `.git/info/exclude`.
+
 ### Harmless
 
 - *"Cancelled before issue reassignment"* and *"Cancelled because issue assignee changed"* runs are normal churn when issues are reassigned. Ignore them.
@@ -146,6 +157,11 @@ For each agent:
 - [ ] **Environment** for Dev, QA and Review: `DOCKER_CONFIG`, `PLAYWRIGHT_BROWSERS_PATH`, `TMPDIR` (11), only if the project uses them.
 - [ ] **AI account** has headroom. Check the provider isn't already rate-limited (3).
 - [ ] **Skills** attached as in the README.
+
+### Housekeeping
+
+- [ ] **One workspace per project**, the local folder (20). *Check:* the project's `workspaces` has one entry.
+- [ ] **Weekly worktree cleanup routine** assigned to Lead (19). *Check:* the routine is `active` with a schedule trigger.
 
 ### The project repo
 
@@ -200,7 +216,7 @@ Observed on 2026.1023.0 in `local_trusted` mode, where browser requests to `http
 | `POST /api/companies/{cid}/skills` | Create: `{ name, slug, description, markdown }` |
 | `PATCH /api/companies/{cid}/skills/{id}/files?path=SKILL.md` | Edit: `{ path, content }` |
 | `DELETE /api/companies/{cid}/skills/{id}` | Remove |
-| `POST /api/companies/{cid}/skills/import` | `{ source }`, a GitHub URL |
+| `POST /api/companies/{cid}/skills/import` | `{ source }`, a GitHub URL. To import every skill on a branch, use `https://github.com/<owner>/<repo>/tree/<branch>`. A link to the `skills` subfolder fails. Imports are pinned to a commit, so re-import after a skill changes. |
 | `POST /api/companies/{cid}/skills/scan-projects` | Imports `skills/*/SKILL.md` from project workspaces |
 
 ### Issues and runs
@@ -213,3 +229,15 @@ Observed on 2026.1023.0 in `local_trusted` mode, where browser requests to `http
 | `GET` / `POST /api/issues/{id}/comments` | Post `{ body }` |
 | `GET /api/companies/{cid}/heartbeat-runs?limit=20&summary=true` | Recent runs, with `status`, `error`, `issueId` |
 | `GET /api/companies/{cid}/live-runs` | What's running now |
+
+### Workspaces and routines
+
+| Call | Notes |
+|---|---|
+| `GET /api/projects/{pid}` | `workspaces` lists the project's workspaces |
+| `DELETE /api/projects/{pid}/workspaces/{wid}` | Remove a project workspace |
+| `GET /api/companies/{cid}/execution-workspaces?summary=true` | Every execution workspace, with `mode`, `status`, `cwd`, `branchName` |
+| `PATCH /api/execution-workspaces/{id}` | `{ status: "archived" }` closes it (sets `closedAt`) |
+| `POST /api/companies/{cid}/routines` | `{ title }`. Created `paused` |
+| `PATCH /api/routines/{id}` | `{ title, description, assigneeAgentId, projectId, priority, status: "active" }` |
+| `POST /api/routines/{id}/triggers` | `{ kind: "schedule", cronExpression: "41 7 * * 1", timezone: "UTC" }` |
