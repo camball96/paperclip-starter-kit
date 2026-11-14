@@ -130,6 +130,12 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 - **Fix:** follow-ups go to the tracker the owner plans from (Lead needs that tracker's connector with create access). Paperclip holds only work in progress. See `paperclip-team-workflow`.
 - **Check:** the Paperclip backlog is empty, or only holds issues the owner has chosen to park there.
 
+#### 22. "Never merge" is only a sentence in a prompt
+- **Symptom:** an agent's Tools page lists `merge_pull_request`, `delete_file`, `create_repository` and `fork_repository`, even though its instructions forbid merging.
+- **Cause:** installing the GitHub app for all agents grants its whole toolset. Instructions are the only thing stopping a merge.
+- **Fix:** add `exclude` rules for those tools to every GitHub access profile, so Paperclip refuses them outright. Then protect the main branches on GitHub (require a pull request, block force pushes and deletion), because agents can still run `git` in a shell.
+- **Check:** `allowedToolNames` for each agent no longer contains them, and `create_pull_request` is still there.
+
 ### Harmless
 
 - *"Cancelled before issue reassignment"* and *"Cancelled because issue assignee changed"* runs are normal churn when issues are reassigned. Ignore them.
@@ -168,6 +174,8 @@ For each agent:
 
 - [ ] **One workspace per project**, the local folder (20). *Check:* the project's `workspaces` has one entry.
 - [ ] **Weekly worktree cleanup routine** assigned to Lead (19). *Check:* the routine is `active` with a schedule trigger.
+- [ ] **Merge, delete and repo-creation tools blocked** for every agent (22). *Check:* the agent's Tools page doesn't list `merge_pull_request`.
+- [ ] **Main branches protected on GitHub** (22): pull request required, force pushes and deletion blocked.
 - [ ] **Lead can create issues in the owner's tracker** (21). *Check:* the agent's Tools page lists the create tool, such as `createJiraIssue`.
 
 ### The project repo
@@ -236,6 +244,14 @@ Observed on 2026.1023.0 in `local_trusted` mode, where browser requests to `http
 | `GET` / `POST /api/issues/{id}/comments` | Post `{ body }` |
 | `GET /api/companies/{cid}/heartbeat-runs?limit=20&summary=true` | Recent runs, with `status`, `error`, `issueId` |
 | `GET /api/companies/{cid}/live-runs` | What's running now |
+
+### Tool access
+
+| Call | Notes |
+|---|---|
+| `GET /api/companies/{cid}/tools/profiles` | Every access profile, one per connected app |
+| `POST /api/tool-profiles/{profileId}/entries` | `{ selectorType: "tool_name", effect: "exclude", toolName: "merge_pull_request" }` blocks one tool |
+| `GET /api/companies/{cid}/tools/profiles/effective/agents/{agentId}` | `allowedToolNames` is what the agent can actually call |
 
 ### Workspaces and routines
 
