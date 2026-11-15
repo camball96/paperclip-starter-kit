@@ -51,13 +51,13 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 #### 7. Two test runs wipe each other
 - **Symptom:** tests that pass alone fail in the full run. Seeded rows are missing before their spec runs. Sign-ins fail for valid accounts.
 - **Causes:** (a) each agent defaults to **20 concurrent runs**; (b) the reviewer also ran the end-to-end suite; (c) every worktree shares one test database that each run resets.
-- **Fix:** set `maxConcurrentRuns: 1` on every agent. Only QA runs e2e. Review runs type-check and unit tests and trusts QA's run on the same commit. Before running e2e, QA checks no other `playwright test` process is running.
-- **Check:** the run list never shows QA and Review e2e runs overlapping.
+- **Fix:** set `maxConcurrentRuns: 1` on every agent. No agent runs the full e2e suite; CI does (24). QA runs only its own specs locally, after checking no other `playwright test` process is running.
+- **Check:** the run list never shows two e2e runs overlapping.
 
 #### 8. The reviewer approves a fix that doesn't exist
 - **Symptom:** "Approve, the e2e blocker is resolved", but the branch hasn't changed since the failing run.
 - **Cause:** the reviewer read the thread, not the branch, and approved before QA had posted.
-- **Fix:** a result only counts for the commit it ran on. Review starts by comparing `HEAD` with the commit in QA's latest passing report. If they differ or QA hasn't reported, it stops.
+- **Fix:** a result only counts for the commit it ran on. Review reads the CI result for the branch's head commit, and approves only when it's green.
 - **Check:** every approval names a commit, and that commit matches QA's.
 
 #### 9. A sign-in rate limit looks like wrong credentials
@@ -142,6 +142,12 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 - **Fix:** agents post the handover comment first and reassign as their very last action (`paperclip-team-reporting`). Turn on the heartbeat timer for Dev, QA and Review (`enabled: true`, `intervalSec: 600`, `skipTimerWhenNoActionableWork: true`), so assigned work nobody is running starts within 10 minutes. Leave it off for Lead, which always owns an in-progress parent and would wake for nothing. To wake a stuck agent by hand, comment on its issue.
 - **Check:** no handover is missing after a "Cancelled before issue reassignment" run, and no assigned issue sits for more than 10 minutes without a run.
 
+#### 24. Testing eats the day
+- **Symptom:** a small ticket takes hours. QA re-runs the full e2e suite after every fix round, after a comment-only change, and every time the base branch moves. Runs stop at the model usage limit and nothing resumes.
+- **Cause:** agents run the full suite locally. It is slow, costs a large share of the usage limit, and the shared test database makes it fragile.
+- **Fix:** Dev opens a **draft** pull request straight after Build, so CI runs the full suite on every push. QA writes specs and runs only those locally. Review approves the head commit only when CI is green on it. Lead marks the draft ready for review. See `paperclip-team-workflow`.
+- **Check:** no agent run contains a full e2e run, and every approval names a commit with a green CI result.
+
 ### Harmless
 
 - *"Cancelled before issue reassignment"* and *"Cancelled because issue assignee changed"* runs are normal churn when issues are reassigned. Ignore them.
@@ -190,6 +196,7 @@ For each agent:
 - [ ] **e2e port** is not 3100 and can be overridden (10).
 - [ ] **`docker-compose.yml`** has a top-level `name:` (12).
 - [ ] **Agent guidance** (`AGENTS.md` or similar) lists which commands agents may run and which are owner-only, and has hard limits: never merge, never push to the main branch, never run migrations.
+- [ ] **CI runs the full test suite** on every push to a pull request (24).
 - [ ] **Project skills** exist for running the tests and opening a PR (below).
 
 ### Project skills
@@ -199,8 +206,8 @@ Keep these in the project repo (for example `skills/`), because they go stale wh
 | Skill | Covers |
 |---|---|
 | `<project>-qa` | The self-check a developer runs before handing over: gates, reading their own diff, sweeping for the class of change |
-| `<project>-e2e` | Preflight (no other run, port free), the one command, and a table of failure symptoms and their usual causes |
-| `<project>-pr` | Base branch, pre-push checks, and a PR description template under 30 lines |
+| `<project>-e2e` | Running a single spec locally, preflight (no other run, port free), reading the CI result, and a table of failure symptoms and their usual causes |
+| `<project>-pr` | Opening a draft into the base branch, pre-push checks, and a PR description template under 30 lines |
 
 Import them with **Skills → New → Import skills from project**, and re-run that after they change.
 

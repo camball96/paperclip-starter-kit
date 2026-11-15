@@ -47,7 +47,7 @@ A handover is at most 15 lines, bullets only:
 
 ```
 Commit: abc1234 on task/ABC-12
-Result: type-check ✓ · unit 31/31 · e2e 42/42
+Result: type-check ✓ · unit 31/31 · CI e2e green at abc1234
 Changed: <files or areas, one line each>
 Not checked: <one line each, or none>
 Next: <who acts, and what>

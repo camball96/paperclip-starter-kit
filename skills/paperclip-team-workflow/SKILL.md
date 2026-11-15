@@ -37,26 +37,36 @@ Hand work over by **assignment**, never by blockers.
 - Never set a blocker on the parent, and never between Build, Test and Review. Paperclip won't wake the assignee of a blocked issue, so a handover onto a blocked issue stalls silently.
 - Each agent finishes by commenting on its own issue, then assigning it back to Lead as its very last action. Paperclip ends the run on reassignment, so anything after it is lost.
 - Lead reads the handover and assigns the next issue: Build → Test → Review.
-- Only one agent works on the branch at a time. Only QA runs the end-to-end suite.
+- Only one agent works on the branch at a time.
+
+## CI runs the full suite, not the agents
+
+No agent runs the full end-to-end suite locally. It is slow, uses a large share of the model usage limit, and a shared test database makes it fragile. CI runs it on every push to the pull request.
+
+1. **Build:** Dev builds, runs type-check and unit tests, pushes and opens a **draft** pull request into the base branch, so CI runs.
+2. **Test:** QA writes specs for the acceptance criteria, runs **only those** locally, and pushes them. For UI work QA also does a visual pass, which CI can't.
+3. **Review:** Review checks the branch's head commit and the CI result for that exact commit. It approves only when CI is green on it.
+4. **Ready:** Lead marks the draft ready for review and posts the three-line update. Only now does it reach the owner.
 
 ## Results belong to a commit
 
 - Every handover names the commit it was produced on.
-- Review approves only the commit QA passed. If HEAD has moved since QA's run, Test runs again first.
-- If the base branch moved, Dev merges it in (never rebases). That changes the commit, so Test and Review run again.
+- Review approves only a head commit CI passed. If CI is still running, it waits.
+- If the base branch moved, Dev merges it in (never rebases) and pushes. CI re-tests the merged result, so nobody re-runs anything by hand.
 
 ## Fix rounds
 
-When Test or Review finds a problem:
+When Review or CI finds a problem:
 
 1. Copy the finding word for word into a comment on **Build** and reassign Build to Dev. Add your decision on each optional item in one line.
-2. When Dev hands back, reassign **Test**, then **Review**.
+2. Dev fixes and pushes. CI re-runs on its own.
+3. Reassign **Review** for the new head commit. Reassign **Test** only if the specs need to change.
 
 Reopen the same three issues every round. Never create new Build, Test or Review issues.
 
 ## The pull request
 
-When Test passed and Review approved **on the same commit**, assign Build to Dev with "Open the PR". Dev follows the project's PR skill. Lead posts the link on the parent with the three-line update from `paperclip-team-reporting`, then marks Build, Test and Review done.
+The draft opened in Build is the ticket's pull request. Never open a second one. Once Review approves the head commit and CI is green on it, Lead marks it ready for review, posts the link on the parent with the three-line update from `paperclip-team-reporting`, then marks Build, Test and Review done.
 
 ## Follow-ups
 

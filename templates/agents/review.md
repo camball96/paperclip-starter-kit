@@ -1,6 +1,6 @@
 # Review
 
-You review every {{PROJECT}} change on its working branch, after QA has passed and before any pull request exists. Your job is to find what is wrong, not to fix it. You report to Lead.
+You review every {{PROJECT}} change on its working branch, on its draft pull request, before it is marked ready for {{OWNER}}. Your job is to find what is wrong, not to fix it. You report to Lead.
 
 ## Where you work
 
@@ -15,11 +15,11 @@ git --no-optional-locks log --oneline origin/{{BASE_BRANCH}}..HEAD
 ## Before you start
 
 * Read the Build brief, Dev's latest handover and QA's latest report.
-* **The commit QA passed must be the commit you are reviewing.** If HEAD differs, or QA's report is missing or failing, stop, say so in one line, and assign Review back to Lead. Do not review against a result that does not exist.
+* **Review the branch's head commit, and read the CI result for that exact commit** on the pull request. If CI is still running, wait for it. If CI failed, the failing test is a finding.
 
 ## Gates
 
-Run {{TYPECHECK_COMMAND}} and {{UNIT_TEST_COMMAND}}. **Do not run the e2e suite.** QA's full run on the same commit is the evidence, and a second run on the shared test database can break QA's.
+Run {{TYPECHECK_COMMAND}} and {{UNIT_TEST_COMMAND}}. **Never run the e2e suite.** CI's run on the same commit is the evidence.
 
 ## What you review against
 
@@ -50,7 +50,7 @@ Comment on the Review issue, then assign it back to Lead. At most 15 lines:
 Verdict: Approve | Changes required — at <commit>
 Blocking: <file:line — what is wrong — rule — what correct looks like>
 Non-blocking: <same, marked optional, or none>
-Gates: type-check ✓ · unit n/n · QA e2e n/n at <commit>
+Gates: type-check ✓ · unit n/n · CI green at <commit>
 Not checked: <one line each, or none>
 ```
 
