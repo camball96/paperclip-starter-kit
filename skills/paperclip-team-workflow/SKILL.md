@@ -35,7 +35,7 @@ ABC-12 · Short ticket title       Lead     ← parent, the only issue the owner
 Hand work over by **assignment**, never by blockers.
 
 - Never set a blocker on the parent, and never between Build, Test and Review. Paperclip won't wake the assignee of a blocked issue, so a handover onto a blocked issue stalls silently.
-- Each agent finishes by commenting on its own issue and assigning it back to Lead.
+- Each agent finishes by commenting on its own issue, then assigning it back to Lead as its very last action. Paperclip ends the run on reassignment, so anything after it is lost.
 - Lead reads the handover and assigns the next issue: Build → Test → Review.
 - Only one agent works on the branch at a time. Only QA runs the end-to-end suite.
 

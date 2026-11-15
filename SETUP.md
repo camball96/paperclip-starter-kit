@@ -136,6 +136,12 @@ Tested on Paperclip **2026.1023.0**, `local_trusted` mode, Claude Code agents (`
 - **Fix:** add `exclude` rules for those tools to every GitHub access profile, so Paperclip refuses them outright. Then protect the main branches on GitHub (require a pull request, block force pushes and deletion), because agents can still run `git` in a shell.
 - **Check:** `allowedToolNames` for each agent no longer contains them, and `create_pull_request` is still there.
 
+#### 23. Handovers vanish, or the next agent never starts
+- **Symptom:** a run shows *"Cancelled before issue reassignment"* and its handover comment is missing. Or an issue is assigned to an idle agent, nothing blocks it, and no run starts.
+- **Cause:** Paperclip ends an agent's run the moment the issue it's running on changes assignee. Text written after the reassignment never posts, and sometimes the new assignee's wake-up is dropped too.
+- **Fix:** agents post the handover comment first and reassign as their very last action (`paperclip-team-reporting`). Turn on the heartbeat timer for Dev, QA and Review (`enabled: true`, `intervalSec: 600`, `skipTimerWhenNoActionableWork: true`), so assigned work nobody is running starts within 10 minutes. Leave it off for Lead, which always owns an in-progress parent and would wake for nothing. To wake a stuck agent by hand, comment on its issue.
+- **Check:** no handover is missing after a "Cancelled before issue reassignment" run, and no assigned issue sits for more than 10 minutes without a run.
+
 ### Harmless
 
 - *"Cancelled before issue reassignment"* and *"Cancelled because issue assignee changed"* runs are normal churn when issues are reassigned. Ignore them.
@@ -166,6 +172,7 @@ For each agent:
 - [ ] **Instructions** from the template, with `{{PLACEHOLDERS}}` filled in. *Check:* the agent's Instructions page shows them.
 - [ ] **Execution engine** is Claude CLI when using a recent model (4). *Check:* Test your agent passes.
 - [ ] **`maxConcurrentRuns: 1`** (7). *Check:* `runtimeConfig.heartbeat.maxConcurrentRuns`.
+- [ ] **Heartbeat timer** on for Dev, QA and Review, off for Lead (23). *Check:* `runtimeConfig.heartbeat.enabled`, with `skipTimerWhenNoActionableWork: true`.
 - [ ] **Environment** for Dev, QA and Review: `DOCKER_CONFIG`, `PLAYWRIGHT_BROWSERS_PATH`, `TMPDIR` (11), only if the project uses them.
 - [ ] **AI account** has headroom. Check the provider isn't already rate-limited (3).
 - [ ] **Skills** attached as in the README.

@@ -55,6 +55,14 @@ Next: <who acts, and what>
 
 Add one extra bullet for detail that matters later, such as a root cause or a decision a reviewer might question. Logs, command output and file-by-file narration stay in the run log.
 
+## Handing an issue to someone else
+
+Paperclip ends your run the moment an issue you are running on changes assignee. Anything after that is lost, including your handover. So, in this order:
+
+1. Post your handover as a comment.
+2. Finish everything else.
+3. Reassign the issue as your very last action, with nothing after it.
+
 ## Never
 
 - Repeat what another agent already posted
